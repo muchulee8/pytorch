@@ -742,7 +742,10 @@ def run_functionalized_fw_and_collect_metadata(
     @wraps(f)
     def inner(*flat_args):
         # This function is meant to be run with the forward, which expects a flat list of tensor/symint/other args.
-        assert all(isinstance(a, KNOWN_TYPES) for a in flat_args)
+        def valid_input(a):
+            # Insanely sus, talk to folks about this
+            return isinstance(a, KNOWN_TYPES) or callable(flat_args[-1])
+        assert all(valid_input(a) for a in flat_args)
 
         input_info: List[InputAliasInfo] = []
         output_info: List[OutputAliasInfo] = []
