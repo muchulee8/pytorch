@@ -11,13 +11,13 @@ TEST(TempFileTest, MatchesExpectedPattern) {
 }
 
 TEST(TempDirTest, tryMakeTempdir) {
-  c10::optional<c10::TempDir> tempdir = c10::make_tempdir("test-dir-");
-  auto tempdir_name = tempdir->name;
+  c10::TempDir tempdir = c10::make_tempdir("test-dir-");
+  auto tempdir_name = tempdir.name;
 
   // directory should exist while tempdir is alive
   ASSERT_TRUE(std::filesystem::is_directory(tempdir_name));
 
   // directory should not exist after tempdir destroyed
-  tempdir.reset();
+  tempdir.~TempDir();
   ASSERT_FALSE(std::filesystem::is_directory(tempdir_name));
 }
