@@ -55,6 +55,32 @@ if(${COMPILER_SUPPORTS_HIDDEN_VISIBILITY})
   target_compile_options(c10 PRIVATE "-fvisibility=hidden")
 endif()
 
+if(NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "MSVC")
+  include(CheckCXXSourceCompiles)
+  include(CMakePushCheckState)
+  cmake_push_check_state(RESET)
+  set(_source_code
+    [==[
+    #include <filesystem>
+    int main() {
+    return 0;
+    }
+    ]==])
+  check_cxx_source_compiles("${_source_code}" __cxx_fs_res)
+  if(NOT __cxx_fs_res)
+    foreach(fslib IN ITEMS stdc++fs c++fs)
+      set(CMAKE_REQUIRED_FLAGS "-std=c++17 -l${fslib}")
+      set(CMAKE_REQUIRED_LINK_OPTIONS "-l${fslib}")
+      check_cxx_source_compiles("${_source_code}" __cxx_${fslib}_res)
+      if(__cxx_${fslib}_res)
+        target_link_libraries(c10 PUBLIC ${fslib})
+        break()
+      endif()
+    endforeach()
+  endif()
+  cmake_pop_check_state()
+endif()
+
 option(C10_USE_IWYU "Use include-what-you-use to clean up header inclusion" OFF)
 if(C10_USE_IWYU)
   find_program(iwyu NAMES include-what-you-use)

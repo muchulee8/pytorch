@@ -172,6 +172,14 @@ if [[ "${BUILD_ENVIRONMENT}" == *clang* ]]; then
   export CXX=clang++
 fi
 
+if [[ "${BUILD_ENVIRONMENT}" == *-clang9-xla* ]]; then
+  export CC=clang-9
+  export CXX=clang++-9
+  sudo apt-get update
+  sudo apt-get install -y --no-install-recommends clang-9
+  sudo apt-get install -y --no-install-recommends llvm-9
+fi
+
 if [[ "$BUILD_ENVIRONMENT" == *-clang*-asan* ]]; then
   export LDSHARED="clang --shared"
   export USE_CUDA=0
